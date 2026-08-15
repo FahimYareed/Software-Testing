@@ -6,3 +6,6 @@ def test_add():
 
 def test_sub():
     assert b - a == 1
+
+def test_mul():
+    assert a * b == 6
