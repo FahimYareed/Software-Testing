@@ -8,6 +8,15 @@ trigger:
 
 pool:
   vmImage: windows-latest
+
+strategy:
+  matrix:
+  
+    Chrome:
+      browser: chromium
+
+    Firefox:
+      browser: firefox
   
 steps:
 
@@ -26,6 +35,6 @@ steps:
   displayName: 'Install dependencies'
 
 - script: 
-    pytest
+    pytest --browser $(browser)
   workingDirectory: Testing
   displayName: 'Run pytest'
