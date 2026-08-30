@@ -15,17 +15,17 @@ steps:
   inputs:
     versionSpec: '3.11'
 
-- script: |
+- script: 
     python --version
     pip --version
   displayName: 'Check Python'
 
-# - script: |
-#     pip install -r requirements.txt
-#   workingDirectory: Testing
-#   displayName: 'Install dependencies'
+- script: 
+    pip install -r requirements.txt
+  workingDirectory: Testing
+  displayName: 'Install dependencies'
 
-# - script: |
-#     pytest
-#   workingDirectory: Testing
-#   displayName: 'Run pytest'
+- script: 
+    pytest
+  workingDirectory: Testing
+  displayName: 'Run pytest'
