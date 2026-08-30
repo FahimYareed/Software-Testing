@@ -1,33 +1,36 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
 
 trigger:
 - main
 
-pool:
-  vmImage: windows-latest
-
 strategy:
   matrix:
   
-    Chrome:
+    Windows_Chrome:
+      vmImage: windows-latest
       browser: chromium
 
-    Firefox:
+    Windows_Firefox:
+      vmImage: windows-latest
       browser: firefox
+
+    Ubuntu_Chrome:
+      vmImage: ubuntu-latest
+      browser: chromium
+
+    Ubuntu_Firefox:
+      vmImage: ubuntu-latest
+      browser: firefox
+
+  maxParallel: 2
+
+pool:
+  vmImage: $(vmImage)
   
 steps:
 
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.11'
-
-- script: 
-    python --version
-    pip --version
-  displayName: 'Check Python'
 
 - script: 
     pip install -r requirements.txt
