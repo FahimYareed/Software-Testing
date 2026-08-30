@@ -20,3 +20,8 @@ steps:
     pip install -r requirements.txt
   workingDirectory: Testing
   displayName: 'Install dependencies'
+
+- script: |
+    pytest
+  workingDirectory: Testing
+  displayName: 'Run pytest'
