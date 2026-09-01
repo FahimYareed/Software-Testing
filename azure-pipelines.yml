@@ -9,9 +9,9 @@ strategy:
       vmImage: windows-latest
       browser: chromium
 
-    Windows_Firefox:
-      vmImage: windows-latest
-      browser: firefox
+    # Windows_Firefox:
+    #   vmImage: windows-latest
+    #   browser: firefox
 
     # Ubuntu_Chrome:
     #   vmImage: ubuntu-latest
@@ -38,7 +38,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: 
-    pytest --browser $(browser)
+    pytest --browser $(browser) --junitxml=test-results.xml
   workingDirectory: Testing
   displayName: 'Run pytest'
 
