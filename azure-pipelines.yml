@@ -47,5 +47,13 @@ steps:
   inputs:
     testResultsFiles: 'Testing/test-results.xml'
     testRunTitle: 'Pytest Results'
-  condition: or(succeeded(), failed())
+  condition: succeededOrFailed()
+
+- script: echo 'Test Passed'
+  displayName: 'Show Step'
+  condition: succeeded()
+
+- script: echo 'Test Failed'
+  displayName: 'Skip Step'
+  condition: failed()
 
