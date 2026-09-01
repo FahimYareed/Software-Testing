@@ -47,8 +47,6 @@ stages:
 
     - script: 
         pip install -r requirements.txt
-        playwright install chromium
-        playwright install firefox
       workingDirectory: Testing
       displayName: 'Install dependencies'
 
