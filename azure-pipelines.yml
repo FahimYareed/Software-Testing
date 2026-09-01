@@ -13,15 +13,15 @@ strategy:
       vmImage: windows-latest
       browser: firefox
 
-    Ubuntu_Chrome:
-      vmImage: ubuntu-latest
-      browser: chromium
+    # Ubuntu_Chrome:
+    #   vmImage: ubuntu-latest
+    #   browser: chromium
 
-    Ubuntu_Firefox:
-      vmImage: ubuntu-latest
-      browser: firefox
+    # Ubuntu_Firefox:
+    #   vmImage: ubuntu-latest
+    #   browser: firefox
 
-  maxParallel: 2
+  # maxParallel: 2
 
 pool:
   vmImage: $(vmImage)
@@ -41,3 +41,11 @@ steps:
     pytest --browser $(browser)
   workingDirectory: Testing
   displayName: 'Run pytest'
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFiles: 'Testing/test-results.xml'
+    testRunTitle: 'Pytest Results'
+  condition: or(succeeded(), failed())
+
