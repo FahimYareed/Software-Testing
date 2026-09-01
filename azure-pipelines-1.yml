@@ -1,19 +1,66 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'windows-latest'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- stage: Build
+  displayName: 'Build'
+
+  jobs:
+  - job: BuildJob
+
+    steps:
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.11'
+
+    - script: |
+        pip install -r requirements.txt
+      workingDirectory: Testing
+      displayName: 'Install dependencies'
+
+- stage: Test
+  displayName: 'Run Test'
+  dependsOn: Build
+
+  jobs:
+  - job: TestJob
+
+    strategy:
+      matrix:
+
+        Chrome:
+          browser: chromium
+
+        Firefox:
+          browser: firefox
+
+    steps:
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.11'
+
+    - script: 
+        pip install -r requirements.txt
+        playwright install chromium
+        playwright install firefox
+      workingDirectory: Testing
+      displayName: 'Install dependencies'
+
+    - script: 
+        pytest --browser $(browser) --junitxml=test-results.xml
+      workingDirectory: Testing
+      displayName: 'Run pytest'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'Testing/test-results.xml'
+        testRunTitle: 'Pytest - $(browser)'
+      condition: succeededOrFailed()
