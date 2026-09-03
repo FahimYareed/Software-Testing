@@ -14,14 +14,23 @@ stages:
 
     steps:
 
-    - script: |
-        python -m pip install --target=packages -r requirements.txt
+    - script:
+        python -m pip install --target="$(Build.ArtifactStagingDirectory)\packages" -r requirements.txt
       workingDirectory: 'Testing'
       displayName: 'Install dependencies'
 
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: 'Testing'
+        Contents: |
+          **
+          !packages/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)\project'
+      displayName: 'Prepare project files'
+
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: 'Testing'
+        targetPath: '$(Build.ArtifactStagingDirectory)'
         artifact: 'build'
       displayName: 'Publish Build Artifact'
 
@@ -38,18 +47,18 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: 'build'
-        path: '$(Pipeline.Workspace)/build'
+        path: '$(Pipeline.Workspace)\build'
       displayName: 'Download Build Artifact'
 
     - script: |
-        set PYTHONPATH=packages
+        set PYTHONPATH=$(Pipeline.Workspace)\build\packages
         python -m pytest --junitxml=test-results.xml
-      workingDirectory: '$(Pipeline.Workspace)/build'
+      workingDirectory: '$(Pipeline.Workspace)\build\project'
       displayName: 'Run pytest'
 
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Pipeline.Workspace)/build/test-results.xml'
+        targetPath: '$(Pipeline.Workspace)\build\project\test-results.xml'
         artifact: 'test-results'
       condition: succeededOrFailed()
       displayName: 'Publish Test Results Artifact'
@@ -67,13 +76,13 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: 'test-results'
-        path: '$(Pipeline.Workspace)/results'
+        path: '$(Pipeline.Workspace)\results'
       displayName: 'Download Test Results'
 
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: '$(Pipeline.Workspace)/results/test-results.xml'
+        testResultsFiles: '$(Pipeline.Workspace)\results\test-results.xml'
         testRunTitle: 'Pytest Results'
       condition: succeededOrFailed()
       displayName: 'Publish Test Results'
