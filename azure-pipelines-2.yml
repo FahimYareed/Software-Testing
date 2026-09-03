@@ -1,19 +1,75 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'windows-latest'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- stage: Build
+  displayName: 'Build'
+
+  jobs:
+  - job: BuildJob
+
+    steps:
+    - script: |
+        pip install -r requirements.txt
+      workingDirectory: 'Testing'
+      displayName: 'Install dependencies'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'Testing'
+        artifact: 'build'
+      displayName: 'Publish Build Artifact'
+
+
+- stage: Test
+  displayName: 'Test'
+  dependsOn: Build
+
+  jobs:
+  - job: TestJob
+
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'build'
+        path: '$(Pipeline.Workspace)/build'
+      displayName: 'Download Build Artifact'
+
+    - script: |
+        pytest --junitxml=test-results.xml
+      workingDirectory: '$(Pipeline.Workspace)/build'
+      displayName: 'Run pytest'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/build/test-results.xml'
+        artifact: 'test-results'
+      condition: succeededOrFailed()
+      displayName: 'Publish Test Results Artifact'
+
+
+- stage: PublishResults
+  displayName: 'Publish Results'
+  dependsOn: Test
+
+  jobs:
+  - job: PublishResultsJob
+
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'test-results'
+        path: '$(Pipeline.Workspace)/results'
+      displayName: 'Download Test Results'
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(Pipeline.Workspace)/results/test-results.xml'
+        testRunTitle: 'Pytest Results'
+      condition: succeededOrFailed()
+      displayName: 'Publish Test Results'
